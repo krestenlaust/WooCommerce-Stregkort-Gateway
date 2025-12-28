@@ -91,7 +91,11 @@ function initialize_my_payment_gateway() {
 
             if ($response['success']) {
                 // Payment was successful.
-                $order->payment_complete();
+                $order->update_status(
+                    'on-hold',
+                    'Waiting for user to confirm payment via email.'
+                );
+                //$order->payment_complete();
 
                 // Save the transaction ID as order meta
                 $order->set_transaction_id($response['transaction_id']);
