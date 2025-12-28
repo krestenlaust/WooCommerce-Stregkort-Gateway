@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Stregsystem Gateway
+Plugin Name: Stregsystem Payment Gateway
 Plugin URI: https://github.com/krestenlaust/WooCommerce-Stregkort-Gateway
 Description: Pay using F-Club Stregkort for WooCommerce
 Version: 1.0
@@ -34,8 +34,8 @@ function initialize_my_payment_gateway() {
             $this->id                 = 'stregsystem_gateway'; // Your gateway identifier
             $this->icon               = ''; // URL of the icon that will be displayed on checkout page
             $this->has_fields         = true; // True if you need custom credit card form
-            $this->method_title       = 'Stregsystem Payment Gateway';
-            $this->method_description = 'Pay with Stregkonto online';
+            $this->method_title       = 'Stregsystem Betalingsportal';
+            $this->method_description = 'Betal med Stregkontoen online!';
 
             $this->supports = array( 'products', 'refunds' );
 
