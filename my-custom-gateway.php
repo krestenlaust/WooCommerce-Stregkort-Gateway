@@ -1,24 +1,24 @@
 <?php
 /*
-Plugin Name: My Custom Gateway
-Plugin URI: http://yourdomain.com
-Description: A custom payment gateway for WooCommerce
+Plugin Name: Stregsystem Gateway
+Plugin URI: https://github.com/krestenlaust/WooCommerce-Stregkort-Gateway
+Description: Pay using F-Club Stregkort for WooCommerce
 Version: 1.0
-Author: Your Name
-Author URI: http://yourdomain.com
+Author: Kresten Laust
+Author URI: https://fklub.dk
 */
 
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-function my_custom_gateway_activate() {
+function stregsystem_gateway_activate() {
     if ( !class_exists( 'WooCommerce' ) || version_compare( get_option('woocommerce_version'), '7.0', '<' ) ) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(__('This plugin requires WooCommerce 7.0 or higher', 'my-plugin-textdomain'), 'Plugin dependency check', array('back_link' => true));
     }
 }
-register_activation_hook(__FILE__, 'my_custom_gateway_activate');
+register_activation_hook(__FILE__, 'stregsystem_gateway_activate');
 
 
 
@@ -28,14 +28,14 @@ function initialize_my_payment_gateway() {
     if ( ! class_exists( 'WC_Payment_Gateway' ) ) return;
 
 
-    class WC_My_Custom_Gateway extends WC_Payment_Gateway {
+    class WC_Stregsystem_Gateway extends WC_Payment_Gateway {
 
         public function __construct() {
-            $this->id                 = 'my_custom_gateway'; // Your gateway identifier
+            $this->id                 = 'stregsystem_gateway'; // Your gateway identifier
             $this->icon               = ''; // URL of the icon that will be displayed on checkout page
             $this->has_fields         = false; // True if you need custom credit card form
-            $this->method_title       = 'My Custom Gateway';
-            $this->method_description = 'Description of My Custom Gateway';
+            $this->method_title       = 'Stregsystem Payment Gateway';
+            $this->method_description = 'Pay with Stregkonto online';
 
             $this->supports = array( 'products', 'refunds' );
 
@@ -55,14 +55,18 @@ function initialize_my_payment_gateway() {
             $this->form_fields = array(
                 'enabled' => array(
                     'title'       => 'Enable/Disable',
-                    'label'       => 'Enable My Custom Gateway',
+                    'label'       => 'Enable Stregsystem Payment Gateway',
                     'type'        => 'checkbox',
                     'default'     => 'no'
                 ),
                 'title' => array(
                     'title'       => 'Title',
                     'type'        => 'text',
-                    'default'     => 'My Custom Payment Gateway',
+                    'default'     => 'Stregsystem Payment Gateway',
+                ),
+                'api_endpoint' => array(
+                    'title'       => 'API Endpoint',
+                    'type'        => 'text',
                 ),
                 'api_key' => array(
                     'title'       => 'API Key',
@@ -97,7 +101,7 @@ function initialize_my_payment_gateway() {
                 $order->save(); // Make sure to save the order to store meta data
 
                 // Add order note
-                $order->add_order_note( 'Payment completed using My Custom Gateway.' );
+                $order->add_order_note( 'Payment completed using Stregkonto.' );
 
                 // Return thankyou redirect
                 return array(
@@ -180,9 +184,8 @@ function initialize_my_payment_gateway() {
 
 
 
-add_filter( 'woocommerce_payment_gateways', 'add_my_custom_gateway' );
-function add_my_custom_gateway( $gateways ) {
-    $gateways[] = 'WC_My_Custom_Gateway';
+add_filter( 'woocommerce_payment_gateways', 'add_stregsystem_gateway' );
+function add_stregsystem_gateway( $gateways ) {
+    $gateways[] = 'WC_Stregsystem_Gateway';
     return $gateways;
 }
-
