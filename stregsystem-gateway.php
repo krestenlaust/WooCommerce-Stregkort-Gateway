@@ -33,7 +33,7 @@ function initialize_my_payment_gateway() {
         public function __construct() {
             $this->id                 = 'stregsystem_gateway'; // Your gateway identifier
             $this->icon               = ''; // URL of the icon that will be displayed on checkout page
-            $this->has_fields         = false; // True if you need custom credit card form
+            $this->has_fields         = true; // True if you need custom credit card form
             $this->method_title       = 'Stregsystem Payment Gateway';
             $this->method_description = 'Pay with Stregkonto online';
 
@@ -67,16 +67,7 @@ function initialize_my_payment_gateway() {
                 'api_endpoint' => array(
                     'title'       => 'API Endpoint',
                     'type'        => 'text',
-                ),
-                'api_key' => array(
-                    'title'       => 'API Key',
-                    'type'        => 'text'
-                ),
-                'api_secret' => array(
-                    'title'       => 'API Secret',
-                    'type'        => 'password'
                 )
-                // Additional fields here if necessary
             );
         }
 
@@ -85,12 +76,18 @@ function initialize_my_payment_gateway() {
             $order = wc_get_order( $order_id );
             $woocommerce->cart->empty_cart();
 
+            $username = sanitize_text_field( $_POST['stregsystem_username'] ?? '' );
+
+            // Save on order for later use
+            $order->update_meta_data( '_stregsystem_username', $username );
+            $order->save();
+
+
             // Get the API credentials.
-            $api_key    = $this->get_option( 'api_key' );
-            $api_secret = $this->get_option( 'api_secret' );
+            $api_endpoint    = $this->get_option( 'api_endpoint' );
 
             // Simulate an API request.
-            $response = $this->simulate_api_request($api_key, $api_secret, $order);
+            $response = $this->simulate_api_request($api_endpoint, $order);
 
             if ($response['success']) {
                 // Payment was successful.
@@ -115,7 +112,36 @@ function initialize_my_payment_gateway() {
             }
         }
 
-        private function simulate_api_request($api_key, $api_secret, $order) {
+        public function payment_fields() {
+            echo '<fieldset>';
+        
+            if ( $this->description ) {
+                echo wpautop( wp_kses_post( $this->description ) );
+            }
+        
+            echo '<p class="form-row form-row-wide">
+                <label for="stregsystem_username">Username <span class="required">*</span></label>
+                <input id="stregsystem_username"
+                       name="stregsystem_username"
+                       type="text"
+                       autocomplete="username"
+                       required />
+            </p>';
+        
+            echo '</fieldset>';
+        }
+        
+
+        public function validate_fields() {
+            if ( empty( $_POST['stregsystem_username'] ) ) {
+                wc_add_notice( 'Please enter your username.', 'error' );
+                return false;
+            }
+
+            return true;
+        }
+
+        private function simulate_api_request($api_endpoint, $order) {
             $order_total = $order->get_total();
 
             // Here you'd normally make an HTTP request to your payment provider.
@@ -181,7 +207,6 @@ function initialize_my_payment_gateway() {
         }
     }
 }
-
 
 
 add_filter( 'woocommerce_payment_gateways', 'add_stregsystem_gateway' );
