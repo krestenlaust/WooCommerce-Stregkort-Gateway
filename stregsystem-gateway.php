@@ -46,6 +46,7 @@ function initialize_my_payment_gateway() {
             // Define user set variables
             $this->title        = $this->get_option( 'title' );
             $this->description  = $this->get_option( 'description' );
+            $this->enabled      = $this->get_option( 'enabled' );
 
             // Actions
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -57,7 +58,7 @@ function initialize_my_payment_gateway() {
                     'title'       => 'Enable/Disable',
                     'label'       => 'Enable Stregsystem Payment Gateway',
                     'type'        => 'checkbox',
-                    'default'     => 'no'
+                    'default'     => 'yes'
                 ),
                 'title' => array(
                     'title'       => 'Title',
@@ -142,6 +143,11 @@ function initialize_my_payment_gateway() {
                 return false;
             }
 
+            return true;
+        }
+
+        public function is_available() {
+            error_log('Stregsystem gateway is_available called');
             return true;
         }
 
