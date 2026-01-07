@@ -20,13 +20,9 @@ function stregsystem_gateway_activate() {
 }
 register_activation_hook(__FILE__, 'stregsystem_gateway_activate');
 
-
-
-add_action( 'plugins_loaded', 'initialize_my_payment_gateway' );
-
-function initialize_my_payment_gateway() {
+add_action( 'plugins_loaded', 'initialize_stregsystem_gateway', 0 );
+function initialize_stregsystem_gateway() {
     if ( ! class_exists( 'WC_Payment_Gateway' ) ) return;
-
 
     class WC_Stregsystem_Gateway extends WC_Payment_Gateway {
 
@@ -147,8 +143,30 @@ function initialize_my_payment_gateway() {
         }
 
         public function is_available() {
-            error_log('Stregsystem gateway is_available called');
-            return true;
+			error_log('=== Stregsystem gateway is_available START ===');
+		    error_log('Gateway ID: ' . $this->id);
+		    error_log('Gateway enabled setting: ' . $this->enabled);
+		    error_log('Gateway title: ' . $this->title);
+
+		    $parent_available = parent::is_available();
+		    error_log('Parent is_available result: ' . ($parent_available ? 'true' : 'false'));
+
+		    if ( ! $parent_available ) {
+		        error_log('Stregsystem gateway: FAILED - parent::is_available() returned false');
+		        return false;
+		    }
+
+		    $api_endpoint = $this->get_option('api_endpoint');
+		    error_log('API endpoint: ' . ($api_endpoint ? $api_endpoint : 'EMPTY'));
+
+		    if ( empty( $api_endpoint ) ) {
+		        error_log('Stregsystem gateway: FAILED - API endpoint not configured');
+		        return false;
+		    }
+
+		    error_log('Stregsystem gateway: SUCCESS - returning true');
+		    error_log('=== Stregsystem gateway is_available END ===');
+		    return true;
         }
 
         private function simulate_api_request($api_endpoint, $order) {
